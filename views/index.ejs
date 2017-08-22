@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title><%= title %></title>
+	<meta name="viewport" content="width=device-width, user-scalable=yes">
+	<link rel='stylesheet' href='/stylesheets/style.css'/>
+</head>
+<body>
+<header>
+	<h1 class="title">Finder</h1>
+	<div class="loading-bar"></div>
+	<p>잠시만 기다려주세요...</p>
+</header>
+<section class="first" style="display:none;">
+	<p class="desc1">오늘 하루동안 <span id="totalCount"></span>마리의 유기동물들이 공고중입니다.</p>
+</section>
+<section class="slide1">
+	<div class="slideDiv">
+		<ul class="animal_slides" style="display:none;"></ul>
+		<div id="pageCount"></div>
+	</div>
+</section>
+
+<script type="text/javascript" src="/javascripts/lib/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" src="/javascripts/lib/responsiveslides.min.js"></script>
+<script type="text/javascript">
+	$.ajax({
+		url: '/notice',
+		method: 'post',
+		dataType: 'json',
+		success: function (data) {
+
+			console.log(data);
+			var animals = data.data.items.item;
+
+			$('#totalCount').text(data.data.totalCount);
+			$('.animal_slides').empty();
+
+			for (var i = 0; i < animals.length; i++) {
+				var html = '';
+
+				html += '<li>';
+				html += '	<div class="animalImg" style="background-image:url(' + animals[i].popfile[0] + ');" ></div>';
+				html += '		<div class="animalDesc">';
+				html += '			<p>' + animals[i].orgNm[0] + ', ' + animals[i].kindCd[0] + '</p>';
+				html += '		</div>';
+				html += '</li>'
+
+				$('.animal_slides').append(html)
+			}
+
+			$(function () {
+				$(".animal_slides").responsiveSlides({
+					namespace: 'animal_slides',
+					nav: true,             // Boolean: Show navigation, true or false
+					pause: false,           // Boolean: Pause on hover, true or false
+					pauseControls: true    // Boolean: Pause when hovering controls, true or false
+				});
+			});
+
+			$('header .loading-bar').animate({
+				'opacity': 0
+			}, 500);
+			$('header p').animate({
+				'opacity': 0
+			}, 500);
+
+			$('#totalCount').fadeIn();
+			$('.animal_slides').fadeIn();
+			$('section.first').fadeIn();
+
+			for (var j = 1; j <= data.data.totalCount / 5; j++) {
+				var pageHtml = '';
+				pageHtml += '<div onclick="getAnimals(' + j + ')">' + j + '</div>';
+
+				$('#pageCount').append(pageHtml);
+			}
+
+		}
+	})
+
+	function getAnimals(number) {
+
+		$('.animal_slides_nav').remove();
+
+		$.ajax({
+			url: '/notice',
+			data: {
+				pageNo: number
+			},
+			method: 'post',
+			dataType: 'json',
+			success: function (data) {
+
+				console.log(data);
+				var animals = data.data.items.item;
+
+				$('#totalCount').text(data.data.totalCount);
+				$('.animal_slides').empty();
+
+				for (var i = 0; i < animals.length; i++) {
+					var html = '';
+
+					html += '<li>';
+					html += '	<div class="animalImg" style="background-image:url(' + animals[i].popfile[0] + ');" ></div>';
+					html += '		<div class="animalDesc">';
+					html += '			<p>' + animals[i].orgNm[0] + ', ' + animals[i].kindCd[0] + '</p>';
+					html += '		</div>';
+					html += '</li>'
+
+					$('.animal_slides').append(html)
+				}
+
+				$(function () {
+					$(".animal_slides").responsiveSlides({
+						namespace: 'animal_slides',
+						nav: true,             // Boolean: Show navigation, true or false
+						pause: false,           // Boolean: Pause on hover, true or false
+						pauseControls: true    // Boolean: Pause when hovering controls, true or false
+					});
+				});
+
+				$('#totalCount').fadeIn();
+				$('.animal_slides').fadeIn();
+				$('section.first').fadeIn();
+			}
+		})
+	}
+</script>
+
+</body>
+</html>
